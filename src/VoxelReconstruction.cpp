@@ -107,7 +107,7 @@ void VoxelReconstruction::showKeys()
  */
 void VoxelReconstruction::run(int argc, char** argv)
 {
-	/*for (int v = 1; v < m_cam_views_amount; ++v)
+	/*for (int v = 0; v < m_cam_views_amount; ++v)
 	{
 		m_cam_views[v]->detIntrinsics();
 	}*/

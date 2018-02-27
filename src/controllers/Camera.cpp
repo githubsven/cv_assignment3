@@ -211,7 +211,7 @@ vector<vector<Point2f>> Camera::getImagePoints(Size imageSize)
 		if (!foundFrame) 
 			return image_points;
 		count++;
-		if (count % 30 == 0) {
+		if (count % 60 == 0) {
 			vector<Point2f> pointBuf;
 			bool found = findChessboardCorners(frame, imageSize, pointBuf,
 				CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
