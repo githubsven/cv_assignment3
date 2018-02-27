@@ -1,0 +1,15 @@
+*.pbxproj
+*.xcworkspacedata
+*.xcuserstate
+*.plist
+/.vs
+/x64
+*.xcbkptlist
+*.cproject
+*.project
+/.settings
+*.sdf
+VoxelReconstruction.VC.opendb
+*.vcxproj
+VoxelReconstruction.vcxproj
+*.vcxproj
