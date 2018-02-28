@@ -15,6 +15,7 @@ using namespace std;
 class ImageUtils {
 public: 
 	static void averageVideo(const std::string folder, const std::string file);
+	static void showAllVideos(std::string folder, std::string file);
 };
 
 #endif /* BACKGROUND_UTILS_ */

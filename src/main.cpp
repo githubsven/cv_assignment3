@@ -20,6 +20,7 @@ int main(
 	VoxelReconstruction::showKeys();
 	VoxelReconstruction vr("data" + std::string(PATH_SEP), 4);
 	vr.run(argc, argv);
+	//ImageUtils::showAllVideos("data/", "video.avi");
 
 	return EXIT_SUCCESS;
 }

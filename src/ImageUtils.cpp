@@ -58,5 +58,35 @@ void ImageUtils::averageVideo(const std::string folder, const std::string file) 
 
 	avgFrame.convertTo(avgFrame, CV_8U);	
 	imwrite(outFile, avgFrame);
+}
 
+void ImageUtils::showAllVideos(std::string folder = "/data/", std::string file = "video.avi") {
+	VideoCapture video[4];
+	for (int i = 0; i < 4; i++) {
+		namedWindow("Video" + to_string(i + 1), 1);
+		string filepath = folder + "cam" + to_string(i + 1) + "/" + file;
+		video[i] = VideoCapture(filepath);
+		if (!video[i].isOpened()) {
+			string error = "Error when reading ";
+			error.append(filepath);
+			throw error;
+		}
+	}
+
+	//m_video.set(CV_CAP_PROP_POS_FRAMES, frame_number);
+
+	int framenr = 0;
+	for (;;) {
+		framenr++;
+		for (int i = 0; i < 4; i++) {
+			Mat frame;
+			video[i] >> frame;
+			string videoWindow = "Video" + to_string(i + 1);
+			imshow(videoWindow, frame);
+		}
+
+		char key = waitKey(100);
+		if (key == 'c' || key == 'C')
+			std::cout << framenr << endl;
+	}	
 }

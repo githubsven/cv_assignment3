@@ -383,6 +383,15 @@ void Glut::keyboard(
 			fs.release();
 			scene3d.processForeground(scene3d.getCameras()[scene3d.getCurrentCamera()]);
 		}
+		else if (key == 'y' || key == 'Y')
+		{
+			vector<Camera*> cameras;
+			cameras = scene3d.getCameras();
+			for (int i = 0; i < 4; i++) {
+				Mat frame = cameras[i]->getFrame();
+				imwrite(cameras[i]->getDataPath() + "frame.png", frame);
+			}
+		}
 	}
 	else if (key_i > 0 && key_i <= (int) scene3d.getCameras().size())
 	{
