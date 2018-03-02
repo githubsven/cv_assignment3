@@ -128,6 +128,20 @@ void VoxelReconstruction::run(int argc, char** argv)
 	Scene3DRenderer scene3d(reconstructor, m_cam_views);
 	Glut glut(scene3d);
 
+	scene3d.setCurrentFrame(721);
+	scene3d.processFrame();
+	scene3d.getReconstructor().update();
+	Mat centers, labels;
+	vector<Point2f> points;
+	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
+	for (int i = 0; i < voxels.size(); i++) {
+		float x = voxels.at(i)->x;
+		float y = voxels.at(i)->y;
+		points.push_back(Point2f(x, y));
+	}
+	kmeans(points, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+	cout << "woohoo";
+
 #ifdef __linux__
 	glut.initializeLinux(SCENE_WINDOW.c_str(), argc, argv);
 #elif defined _WIN32
