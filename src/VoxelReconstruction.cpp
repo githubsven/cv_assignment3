@@ -132,6 +132,7 @@ void VoxelReconstruction::run(int argc, char** argv)
 	vector<Point2f> points;
 	vector<int> labels;
 	Mat centers;
+	ImageUtils::doKMeans(scene3d, points, labels, centers, 721);
 	ImageUtils::createColorModel(scene3d, points, labels, centers, 721);
 	
 #ifdef __linux__
