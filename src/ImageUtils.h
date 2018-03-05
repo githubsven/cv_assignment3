@@ -13,12 +13,14 @@
 
 using namespace cv;
 using namespace std;
+using namespace nl_uu_science_gmt;
 
 class ImageUtils {
 public: 
 	static void averageVideo(const std::string folder, const std::string file);
 	static void showAllVideos(std::string folder, std::string file);
-	static void doKMeans(nl_uu_science_gmt::Scene3DRenderer scene3d, Mat& labels, Mat& centers);
+	static void doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame);
+	static void createColorModel(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame);
 };
 
 #endif /* BACKGROUND_UTILS_ */
