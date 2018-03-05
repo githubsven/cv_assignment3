@@ -112,10 +112,32 @@ void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vect
 
 void ImageUtils::createColorModel(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
 	ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
-	Mat newImage = scene3d.getCameras()[0]->getFrame();
-	for (int i = 0; i < points.size(); i++) {
+
+	Mat image(scene3d.getCameras()[0]->getFrame().rows, scene3d.getCameras()[0]->getFrame().cols, CV_8UC3);
+
+	FileStorage fs;
+	fs.open("data/cam1/config.xml", FileStorage::READ);
+	Mat cameraMat, distMat, rvecs, tvecs;
+	if (fs.isOpened())
+	{
+		fs["CameraMatrix"] >> cameraMat;
+		fs["DistortionCoeffs"] >> distMat;
+		fs["RotationValues"] >> rvecs;
+		fs["TranslationValue"] >> tvecs;
+	}
+	else {
+		cout << "Error";
+	}
+
+	vector<Point2f> imagePoints;
+	projectPoints(scene3d.getReconstructor().getVisibleVoxels(), rvecs, tvecs, cameraMat, distMat, imagePoints);
+
+	for (int i = 0; i < imagePoints.size(); i++) {
 		if (labels[i] == 0) {
-			newImage.at<Scalar>(points[i]) = Scalar(0, 0, 255);
+			cout << imagePoints[i];
+			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 0, 255);
 		}
 	}
+	namedWindow("Test", 1);
+	imshow("Test", image); 
 }
