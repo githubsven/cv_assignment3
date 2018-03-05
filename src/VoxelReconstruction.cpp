@@ -137,10 +137,12 @@ void VoxelReconstruction::run(int argc, char** argv)
 	for (int i = 0; i < voxels.size(); i++) {
 		float x = voxels.at(i)->x;
 		float y = voxels.at(i)->y;
-		points.push_back(Point2f(x, y));
+		points.push_back(Point2f(x, y)); // Ignore height
 	}
 	kmeans(points, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
-	cout << "woohoo";
+	
+	cout << "CENTERS: " << centers << endl;
+	cout << "LABELS: " << labels << endl;
 
 #ifdef __linux__
 	glut.initializeLinux(SCENE_WINDOW.c_str(), argc, argv);

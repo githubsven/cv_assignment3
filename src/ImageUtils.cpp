@@ -7,8 +7,11 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include "ImageUtils.h"
+#include "controllers/Scene3DRenderer.h"
+
 
 using namespace cv;
+using namespace nl_uu_science_gmt;
 using std::string;
 using std::cout;
 using std::cin;
@@ -88,5 +91,22 @@ void ImageUtils::showAllVideos(std::string folder = "/data/", std::string file =
 		char key = waitKey(100);
 		if (key == 'c' || key == 'C')
 			std::cout << framenr << endl;
-	}	
+	}
+}
+
+void ImageUtils::doKMeans(Scene3DRenderer scene3d, Mat& labels, Mat& centers) {
+	scene3d.setCurrentFrame(721);
+	scene3d.processFrame();
+	scene3d.getReconstructor().update();
+	vector<Point2f> points;
+	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
+	for (int i = 0; i < voxels.size(); i++) {
+		float x = voxels.at(i)->x;
+		float y = voxels.at(i)->y;
+		points.push_back(Point2f(x, y)); // Ignore height
+	}
+	kmeans(points, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+
+	// cout << "CENTERS: " << centers << endl; // [604.23083, 721.55988; 698.37085, -552.45032; 1977.1892, -793.18921; 1980.0151, 650.80756]
+	// cout << "LABELS: " << labels << endl; //  [2;2;2;2;2;2;2;2;2;2;2;2;1;2;1;1;... 
 }
