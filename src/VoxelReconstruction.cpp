@@ -124,16 +124,17 @@ void VoxelReconstruction::run(int argc, char** argv)
 
 	destroyAllWindows();
 	namedWindow(VIDEO_WINDOW, 1);
-
 	Reconstructor reconstructor(m_cam_views);
 	Scene3DRenderer scene3d(reconstructor, m_cam_views);
 	Glut glut(scene3d);
 
 	vector<Point2f> points;
-	vector<int> labels;
+	vector<int> labels, means(4, 0);
 	Mat centers;
 	ImageUtils::doKMeans(scene3d, points, labels, centers, 721);
-	ImageUtils::createColorModel(scene3d, points, labels, centers, 721);
+	ImageUtils::createColorModel(scene3d, labels, means);
+	for (int i = 0; i < means.size(); i++)
+		cout << means[i] << endl;
 	
 #ifdef __linux__
 	glut.initializeLinux(SCENE_WINDOW.c_str(), argc, argv);

@@ -110,51 +110,51 @@ void ImageUtils::doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vec
 	// cout << "LABELS: " << labels << endl; //  [2;2;2;2;2;2;2;2;2;2;2;2;1;2;1;1;... 
 }
 
-void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
-	ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
-
-	Mat image(scene3d.getCameras()[0]->getFrame().rows, scene3d.getCameras()[0]->getFrame().cols, CV_8UC3);
-
+void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<int>& means) {
 	FileStorage fs;
-	fs.open("data/cam1/config.xml", FileStorage::READ);
 	Mat cameraMat, distMat, rvecs, tvecs;
-	if (fs.isOpened())
-	{
-		fs["CameraMatrix"] >> cameraMat;
-		fs["DistortionCoeffs"] >> distMat;
-		fs["RotationValues"] >> rvecs;
-		fs["TranslationValues"] >> tvecs;
-	}
-	else {
-		cout << "Error";
-	}
+	vector<int> totalRedColors(4, 0);
+	vector<int> personCount(4, 0);
 
 	vector<Point3f> objectPoints;
-	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels(); // Same memory allocation as the one in doKMeans
+	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
 	for (int i = 0; i < voxels.size(); i++) {
 		float x = (float)voxels.at(i)->x;
 		float y = (float)voxels.at(i)->y;
 		float z = (float)voxels.at(i)->z;
-		objectPoints.push_back(Point3f(x, y, z)); // Ignore height
+		objectPoints.push_back(Point3f(x, y, z));
 	}
 
-	vector<Point2f> imagePoints;
-	projectPoints(objectPoints, rvecs, tvecs, cameraMat, distMat, imagePoints);
+	int count = 0;
+	for (int i = 1; i < 5; i++) {
+		fs.open("data/cam" + to_string(i) + "/config.xml", FileStorage::READ);
+		if (fs.isOpened())
+		{
+			fs["CameraMatrix"] >> cameraMat;
+			fs["DistortionCoeffs"] >> distMat;
+			fs["RotationValues"] >> rvecs;
+			fs["TranslationValues"] >> tvecs;
+		}
+		else {
+			cout << "could not open file data / cam" + to_string(i) + " / config.xml";
+		}
 
-	for (int i = 0; i < imagePoints.size(); i++) {
-		if (labels[i] == 0) {
-			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 0, 255);
-		}
-		else if (labels[i] == 1) {
-			image.at<Vec3b>(imagePoints[i]) = Vec3b(255, 0, 0);
-		}
-		else if (labels[i] == 2) {
-			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 255, 0);
-		}
-		else if (labels[i] == 3) {
-			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 0, 0);
+		vector<Point2f> imagePoints;
+		projectPoints(objectPoints, rvecs, tvecs, cameraMat, distMat, imagePoints);
+
+		Mat frame = scene3d.getCameras()[i]->getFrame();
+		for (int point = 0; point < imagePoints.size(); point++) {
+			count++;
+			cout << to_string(labels[point]);
+			if (count == 25401 || labels[point] > 3 || imagePoints[point].x < 0  || imagePoints[point].x > 644 || imagePoints[point].y < 0 || imagePoints[point].y > 480) {
+				cout << "FUCK at " + to_string(labels[point]);
+			}
+			totalRedColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[2];
+			personCount[labels[point]] += 1;
 		}
 	}
-	namedWindow("Test", 1);
-	imshow("Test", image); 
+	cout << "DONE";
+	for (int i = 0; i < totalRedColors.size(); i++) {
+		means[i] = totalRedColors[i] / personCount[i];
+	}
 }
