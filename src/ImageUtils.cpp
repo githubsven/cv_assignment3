@@ -94,7 +94,7 @@ void ImageUtils::showAllVideos(std::string folder = "/data/", std::string file =
 	}
 }
 
-void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
+void ImageUtils::doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
 	scene3d.setCurrentFrame(721);
 	scene3d.processFrame();
 	scene3d.getReconstructor().update();
@@ -110,8 +110,8 @@ void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vect
 	// cout << "LABELS: " << labels << endl; //  [2;2;2;2;2;2;2;2;2;2;2;2;1;2;1;1;... 
 }
 
-void ImageUtils::createColorModel(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
-	//ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
+void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
+	ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
 
 	Mat image(scene3d.getCameras()[0]->getFrame().rows, scene3d.getCameras()[0]->getFrame().cols, CV_8UC3);
 
