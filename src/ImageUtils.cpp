@@ -100,8 +100,8 @@ void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vect
 	scene3d.getReconstructor().update();
 	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
 	for (int i = 0; i < voxels.size(); i++) {
-		float x = voxels.at(i)->x;
-		float y = voxels.at(i)->y;
+		float x = (float)voxels.at(i)->x;
+		float y = (float)voxels.at(i)->y;
 		points.push_back(Point2f(x, y)); // Ignore height
 	}
 	kmeans(points, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
@@ -111,7 +111,7 @@ void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vect
 }
 
 void ImageUtils::createColorModel(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
-	ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
+	//ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
 
 	Mat image(scene3d.getCameras()[0]->getFrame().rows, scene3d.getCameras()[0]->getFrame().cols, CV_8UC3);
 
@@ -123,19 +123,36 @@ void ImageUtils::createColorModel(Scene3DRenderer scene3d, vector<Point2f>& poin
 		fs["CameraMatrix"] >> cameraMat;
 		fs["DistortionCoeffs"] >> distMat;
 		fs["RotationValues"] >> rvecs;
-		fs["TranslationValue"] >> tvecs;
+		fs["TranslationValues"] >> tvecs;
 	}
 	else {
 		cout << "Error";
 	}
 
+	vector<Point3f> objectPoints;
+	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels(); // Same memory allocation as the one in doKMeans
+	for (int i = 0; i < voxels.size(); i++) {
+		float x = (float)voxels.at(i)->x;
+		float y = (float)voxels.at(i)->y;
+		float z = (float)voxels.at(i)->z;
+		objectPoints.push_back(Point3f(x, y, z)); // Ignore height
+	}
+
 	vector<Point2f> imagePoints;
-	projectPoints(scene3d.getReconstructor().getVisibleVoxels(), rvecs, tvecs, cameraMat, distMat, imagePoints);
+	projectPoints(objectPoints, rvecs, tvecs, cameraMat, distMat, imagePoints);
 
 	for (int i = 0; i < imagePoints.size(); i++) {
 		if (labels[i] == 0) {
-			cout << imagePoints[i];
 			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 0, 255);
+		}
+		else if (labels[i] == 1) {
+			image.at<Vec3b>(imagePoints[i]) = Vec3b(255, 0, 0);
+		}
+		else if (labels[i] == 2) {
+			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 255, 0);
+		}
+		else if (labels[i] == 3) {
+			image.at<Vec3b>(imagePoints[i]) = Vec3b(0, 0, 0);
 		}
 	}
 	namedWindow("Test", 1);
