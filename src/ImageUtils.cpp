@@ -94,11 +94,10 @@ void ImageUtils::showAllVideos(std::string folder = "/data/", std::string file =
 	}
 }
 
-void ImageUtils::doKMeans(Scene3DRenderer scene3d, Mat& labels, Mat& centers) {
+void ImageUtils::doKMeans(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
 	scene3d.setCurrentFrame(721);
 	scene3d.processFrame();
 	scene3d.getReconstructor().update();
-	vector<Point2f> points;
 	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
 	for (int i = 0; i < voxels.size(); i++) {
 		float x = voxels.at(i)->x;
@@ -109,4 +108,14 @@ void ImageUtils::doKMeans(Scene3DRenderer scene3d, Mat& labels, Mat& centers) {
 
 	// cout << "CENTERS: " << centers << endl; // [604.23083, 721.55988; 698.37085, -552.45032; 1977.1892, -793.18921; 1980.0151, 650.80756]
 	// cout << "LABELS: " << labels << endl; //  [2;2;2;2;2;2;2;2;2;2;2;2;1;2;1;1;... 
+}
+
+void ImageUtils::createColorModel(Scene3DRenderer scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
+	ImageUtils::doKMeans(scene3d, points, labels, centers, frame);
+	Mat newImage = scene3d.getCameras()[0]->getFrame();
+	for (int i = 0; i < points.size(); i++) {
+		if (labels[i] == 0) {
+			newImage.at<Scalar>(points[i]) = Scalar(0, 0, 255);
+		}
+	}
 }
