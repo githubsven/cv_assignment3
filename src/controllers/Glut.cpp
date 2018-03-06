@@ -228,7 +228,7 @@ int Glut::initializeWindows(const char* win_name)
  */
 void Glut::mainLoopWindows()
 {
-	while(!m_Glut->getScene3d().isQuit())
+	while (!m_Glut->getScene3d().isQuit())
 	{
 		update(0);
 		// Assignment 3
@@ -265,11 +265,18 @@ void Glut::trackPeople(vector<int>& correspondingLabels, vector<int>& labels) {
 	calculateCorrespondingLabels(correspondingLabels, labels, centers);
 	vector<Reconstructor::Voxel*> voxels = m_scene3d.getReconstructor().getVisibleVoxels();
 
+	
+	if (m_scene3d.isPaused()) {
+		return; // Don't store anything if it's paused
+	}
+
+	//int frame = m_scene3d.getCurrentFrame();
 	for (int i = 0; i < correspondingLabels.size(); i++) {
 		int personId = correspondingLabels[i];
+		//Glut::traces[personId][frame] = Point2d(centers.row(i));
 		Glut::traces[personId].push_back(Point2d(centers.row(i)));
 	}
-		
+
 }
 
 /**
