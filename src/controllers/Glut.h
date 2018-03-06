@@ -40,6 +40,7 @@ class Glut
 	static void drawVoxels();
 	static void drawWCoord();
 	static void drawInfo();
+	void drawTrail();
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);

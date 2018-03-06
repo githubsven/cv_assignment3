@@ -16,6 +16,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <stddef.h>
 #include <cmath>
 #include <complex>
@@ -958,6 +959,32 @@ void Glut::drawWCoord()
 
 	glEnd();
 	glPopMatrix();
+}
+
+void Glut::drawTrail()
+{
+	// centerMemory = vector<vector<Point3f> // Centers found per label for previous frames
+	// color = vector<Scalar> // Per person a Scalar representing it's color
+	Mat cameraMat, distMat, rvecs, tvecs;
+	FileStorage fs;
+	fs.open("data/cam" + to_string(m_scene3d.getCurrentCamera()) + "/config.xml", FileStorage::READ);
+	if (fs.isOpened())
+	{
+		fs["CameraMatrix"] >> cameraMat;
+		fs["DistortionCoeffs"] >> distMat;
+		fs["RotationValues"] >> rvecs;
+		fs["TranslationValues"] >> tvecs;
+	}
+
+	Mat image = imread(MAIN_WINDOW);
+	for (int label = 0; label < centerMemory.size(); label++) {
+		vector<Point2f> imagePoints;
+		projectPoints(centerMemory[label], rvecs, tvecs, cameraMat, distMat, imagePoints);
+		for (int frame = 1; frame < imagePoints.size(); frame++) {
+			line(image, imagePoints[frame], imagePoints[frame], color[label]);
+		}
+	}
+	imshow(MAIN_WINDOW, image);
 }
 
 /**
