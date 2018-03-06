@@ -49,6 +49,16 @@ Glut::Glut(
 {
 	// static pointer to this class so we can get to it from the static GL events
 	m_Glut = this;
+	int nFrames = s3d.getNumberOfFrames();
+	//Point2d defaultPoint(numeric_limits<double>::infinity(), numeric_limits<double>::infinity());
+	//traces = {vector<Point2d>(nFrames, defaultPoint),
+	//	vector<Point2d>(nFrames, defaultPoint),
+	//	vector<Point2d>(nFrames, defaultPoint),
+	//	vector<Point2d>(nFrames, defaultPoint)};
+	traces = { vector<Point2d>(),
+		vector<Point2d>(),
+		vector<Point2d>(),
+		vector<Point2d>()};
 }
 
 Glut::~Glut()
@@ -251,21 +261,25 @@ void Glut::createBaseColorModels() {
 }
 
 void Glut::trackPeople(vector<int>& correspondingLabels, vector<int>& labels) {
-	calculateCorrespondingLabels(correspondingLabels, labels);
+	Mat centers;
+	calculateCorrespondingLabels(correspondingLabels, labels, centers);
 	vector<Reconstructor::Voxel*> voxels = m_scene3d.getReconstructor().getVisibleVoxels();
 
-	
+	for (int i = 0; i < correspondingLabels.size(); i++) {
+		int personId = correspondingLabels[i];
+		Glut::traces[personId].push_back(Point2d(centers.row(i)));
+	}
+		
 }
 
 /**
  *
  *	correspondingLabels: Stores to which model corresponds each label. Position in the array is equivalent to label, value is the position of the color model in baseColorModels
  */
-void Glut::calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels) {
+void Glut::calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels, Mat& centers) {
 	int frame = m_scene3d.getCurrentFrame();
 	vector<Point2f> points;
 	vector<Scalar> colorModels(4);
-	Mat centers;
 	ImageUtils::doKMeans(m_scene3d, points, labels, centers, frame);
 	ImageUtils::createColorModel(m_scene3d, labels, colorModels);
 

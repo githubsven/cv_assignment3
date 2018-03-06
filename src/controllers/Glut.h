@@ -38,6 +38,7 @@ class Glut
 
 	// Assignment 3
 	std::vector<cv::Scalar> baseColorModels;
+	std::vector<vector<cv::Point2d>> traces;
 
 	static Glut* m_Glut;
 
@@ -53,7 +54,7 @@ class Glut
 	// Assignment 3
 	void createBaseColorModels();
 	void trackPeople(vector<int>& correspondingLabels, vector<int>& labels);
-	void calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels);
+	void calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels, Mat& centers);
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);
