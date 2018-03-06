@@ -48,13 +48,14 @@ class Glut
 	static void drawVoxels(vector<int>& correspondingLabels, vector<int>& labels);
 	static void drawWCoord();
 	static void drawInfo();
-	static void drawTrail();
 
 	// Assignment 3
 	static std::vector<std::vector<cv::Point2d>> traces;
 	void createBaseColorModels();
 	void trackPeople(vector<int>& correspondingLabels, vector<int>& labels);
 	void calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels, Mat& centers);
+	static void drawTrail();
+	static void drawTrailToImage();
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);

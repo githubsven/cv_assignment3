@@ -46,6 +46,7 @@ std::vector<std::vector<cv::Point2d>> Glut::traces = { vector<Point2d>(),
 	vector<Point2d>(),
 	vector<Point2d>(),
 	vector<Point2d>() };
+bool saveTrail = false;
 
 Glut::Glut(
 		Scene3DRenderer &s3d) :
@@ -54,11 +55,7 @@ Glut::Glut(
 	// static pointer to this class so we can get to it from the static GL events
 	m_Glut = this;
 	int nFrames = s3d.getNumberOfFrames();
-	//Point2d defaultPoint(numeric_limits<double>::infinity(), numeric_limits<double>::infinity());
-	//traces = {vector<Point2d>(nFrames, defaultPoint),
-	//	vector<Point2d>(nFrames, defaultPoint),
-	//	vector<Point2d>(nFrames, defaultPoint),
-	//	vector<Point2d>(nFrames, defaultPoint)};
+	namedWindow("TrailWindow");
 	
 }
 
@@ -237,6 +234,7 @@ void Glut::mainLoopWindows()
 		vector<int> labels;
 		trackPeople(correspondingLabels, labels);
 		display(correspondingLabels, labels);
+		drawTrailToImage();
 	}
 }
 #endif
@@ -337,6 +335,29 @@ void Glut::drawTrail()
 		glEnd();
 	}
 	glPopMatrix();
+}
+
+void Glut::drawTrailToImage() {
+		Mat image(510, 750, CV_8UC3);
+		Scalar color;
+		for (int label = 0; label < traces.size(); label++) {
+			if (label == 0) color = Scalar(255, 0, 0, 0);
+			else if (label == 1) color = Scalar(0, 255, 0, 0);
+			else if (label == 2) color = Scalar(0, 0, 255, 0);
+			else if (label == 3) color = Scalar(102, 64, 204, 0);
+			for (int frame = 1; frame < Glut::traces[label].size(); frame++) {
+				Point point1((int)(traces[label][frame - 1].x / 5) + 150, (int)(traces[label][frame - 1].y / 5) + 290);
+				//Point point2((int)(traces[label][frame].x / 5) + 150, (int)(traces[label][frame].y / 5) + 290);
+				//line(image, point1, point2, color);
+				circle(image, point1, 2, color, 2);
+			}
+		}
+
+		imshow("TrailWindow", image);
+		if (saveTrail) {
+			imwrite("data/trailImage.jpg", image);
+			saveTrail = false;
+		}
 }
 
 // END OF ASSIGNMENT 3 FUNCTIONS
@@ -512,6 +533,10 @@ void Glut::keyboard(
 				Mat frame = cameras[i]->getFrame();
 				imwrite(cameras[i]->getDataPath() + "frame.png", frame);
 			}
+		}
+		else if (key == 'x' || key == 'X')
+		{
+			saveTrail = true;
 		}
 	}
 	else if (key_i > 0 && key_i <= (int) scene3d.getCameras().size())
