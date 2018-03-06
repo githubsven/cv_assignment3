@@ -243,21 +243,21 @@ void Scene3DRenderer::createFloorGrid()
 	// edge 1
 	vector<Point3i*> edge1;
 	for (int y = -size * m_num; y <= size * m_num; y += size)
-		edge1.push_back(new Point3i(-size * m_num, y, z_offset));
+		edge1.push_back(new Point3i(-size * m_num * 0.5, y, z_offset));
 
 	// edge 2
 	vector<Point3i*> edge2;
-	for (int x = -size * m_num; x <= size * m_num; x += size)
+	for (int x = -size * m_num * 0.5; x <= size * m_num * 1.5; x += size)
 		edge2.push_back(new Point3i(x, size * m_num, z_offset));
 
 	// edge 3
 	vector<Point3i*> edge3;
 	for (int y = -size * m_num; y <= size * m_num; y += size)
-		edge3.push_back(new Point3i(size * m_num, y, z_offset));
+		edge3.push_back(new Point3i(size * m_num * 1.5, y, z_offset));
 
 	// edge 4
 	vector<Point3i*> edge4;
-	for (int x = -size * m_num; x <= size * m_num; x += size)
+	for (int x = -size * m_num * 0.5; x <= size * m_num * 1.5; x += size)
 		edge4.push_back(new Point3i(x, -size * m_num, z_offset));
 
 	m_floor_grid.push_back(edge1);

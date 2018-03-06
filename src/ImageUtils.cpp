@@ -95,7 +95,7 @@ void ImageUtils::showAllVideos(std::string folder = "/data/", std::string file =
 }
 
 void ImageUtils::doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame) {
-	scene3d.setCurrentFrame(721);
+	scene3d.setCurrentFrame(frame);
 	scene3d.processFrame();
 	scene3d.getReconstructor().update();
 	vector<Reconstructor::Voxel*> voxels = scene3d.getReconstructor().getVisibleVoxels();
@@ -110,10 +110,10 @@ void ImageUtils::doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vec
 	// cout << "LABELS: " << labels << endl; //  [2;2;2;2;2;2;2;2;2;2;2;2;1;2;1;1;... 
 }
 
-void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<int>& means) {
+void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<Scalar>& means) {
 	FileStorage fs;
 	Mat cameraMat, distMat, rvecs, tvecs;
-	vector<int> totalRedColors(4, 0);
+	vector<int> totalRedColors(4, 0), totalGreenColors(4, 0), totalBlueColors(4, 0);
 	vector<int> personCount(4, 0);
 
 	vector<Point3f> objectPoints;
@@ -144,11 +144,16 @@ void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels,
 		Mat frame = scene3d.getCameras()[i]->getFrame();
 		for (int point = 0; point < imagePoints.size(); point++) {
 			totalRedColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[2];
+			totalGreenColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[1];
+			totalBlueColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[0];
 			personCount[labels[point]] += 1;
 		}
 	}
 
 	for (int i = 0; i < totalRedColors.size(); i++) {
-		means[i] = totalRedColors[i] / personCount[i];
+		int meanRed = totalRedColors[i] / personCount[i];
+		int meanBlue = totalBlueColors[i] / personCount[i];
+		int meanGreen = totalGreenColors[i] / personCount[i];
+		means[i] = Scalar(meanBlue, meanGreen, meanRed);
 	}
 }

@@ -20,7 +20,7 @@ public:
 	static void averageVideo(const std::string folder, const std::string file);
 	static void showAllVideos(std::string folder, std::string file);
 	static void doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame);
-	static void createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<int>& means);
+	static void createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<Scalar>& means);
 };
 
 #endif /* BACKGROUND_UTILS_ */

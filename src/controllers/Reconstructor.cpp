@@ -66,8 +66,8 @@ Reconstructor::~Reconstructor()
 void Reconstructor::initialize()
 {
 	// Cube dimensions from [(-m_height, m_height), (-m_height, m_height), (0, m_height)]
-	const int xL = -m_height;
-	const int xR = m_height;
+	const int xL = -m_height * 0.5;
+	const int xR = m_height * 1.5;
 	const int yL = -m_height;
 	const int yR = m_height;
 	const int zL = 0;
@@ -95,7 +95,7 @@ void Reconstructor::initialize()
 
 	int z;
 	int pdone = 0;
-#pragma omp parallel for schedule(static) private(z) shared(pdone)
+#pragma omp parallel for schedule(guided) private(z) shared(pdone)
 	for (z = zL; z < zR; z += m_step)
 	{
 		const int zp = (z - zL) / m_step;
@@ -159,7 +159,7 @@ void Reconstructor::update()
 	std::vector<Voxel*> visible_voxels;
 
 	int v;
-#pragma omp parallel for schedule(static) private(v) shared(visible_voxels)
+#pragma omp parallel for schedule(guided) private(v) shared(visible_voxels)
 	for (v = 0; v < (int) m_voxels_amount; ++v)
 	{
 		int camera_counter = 0;
