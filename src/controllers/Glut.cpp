@@ -1056,9 +1056,19 @@ void Glut::drawTrail()
 {
 	// centerMemory = vector<vector<Point3f> // Centers found per label for previous frames
 	// color = vector<Scalar> // Per person a Scalar representing it's color
+	vector<vector<Point3f>> centerMemory;
+	vector<Point3f> test;
+	test.push_back(Point3f(2000, 100, 0)); test.push_back(Point3f(1, 1, 0)); test.push_back(Point3f(500, 600, 0));
+	centerMemory.push_back(test);
+	vector<Scalar> colors;
+	colors.push_back(Scalar(255, 0, 0)); colors.push_back(Scalar(255, 255, 0)); colors.push_back(Scalar(0, 255, 0)); colors.push_back(Scalar(0, 0, 255));
 	Mat cameraMat, distMat, rvecs, tvecs;
 	FileStorage fs;
-	fs.open("data/cam" + to_string(m_scene3d.getCurrentCamera()) + "/config.xml", FileStorage::READ);
+	int cameraNr = m_scene3d.getCurrentCamera();
+	if (cameraNr == -1) {
+		cameraNr = 0;
+	}
+	fs.open("data/cam" + to_string(cameraNr + 1) + "/config.xml", FileStorage::READ);
 	if (fs.isOpened())
 	{
 		fs["CameraMatrix"] >> cameraMat;
@@ -1067,15 +1077,17 @@ void Glut::drawTrail()
 		fs["TranslationValues"] >> tvecs;
 	}
 
-	Mat image = imread(MAIN_WINDOW);
+	vector<Camera*> cameras = m_scene3d.getCameras();
+	Camera* currentCam = cameras[cameraNr];
+	Mat image = currentCam->getFrame();
 	for (int label = 0; label < centerMemory.size(); label++) {
 		vector<Point2f> imagePoints;
 		projectPoints(centerMemory[label], rvecs, tvecs, cameraMat, distMat, imagePoints);
-		for (int frame = 1; frame < imagePoints.size(); frame++) {
-			line(image, imagePoints[frame], imagePoints[frame], color[label]);
+		for (int f = 1; f < imagePoints.size(); f++) {
+			line(image, imagePoints[f], imagePoints[f - 1], colors[label], 9);
 		}
 	}
-	imshow(MAIN_WINDOW, image);
+	imshow(SCENE_WINDOW, image);
 }
 
 /**
