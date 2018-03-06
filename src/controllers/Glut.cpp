@@ -1054,40 +1054,19 @@ void Glut::drawWCoord()
 
 void Glut::drawTrail()
 {
-	// centerMemory = vector<vector<Point3f> // Centers found per label for previous frames
-	// color = vector<Scalar> // Per person a Scalar representing it's color
-	vector<vector<Point3f>> centerMemory;
-	vector<Point3f> test;
-	test.push_back(Point3f(2000, 100, 0)); test.push_back(Point3f(1, 1, 0)); test.push_back(Point3f(500, 600, 0));
-	centerMemory.push_back(test);
-	vector<Scalar> colors;
-	colors.push_back(Scalar(255, 0, 0)); colors.push_back(Scalar(255, 255, 0)); colors.push_back(Scalar(0, 255, 0)); colors.push_back(Scalar(0, 0, 255));
-	Mat cameraMat, distMat, rvecs, tvecs;
-	FileStorage fs;
-	int cameraNr = m_scene3d.getCurrentCamera();
-	if (cameraNr == -1) {
-		cameraNr = 0;
-	}
-	fs.open("data/cam" + to_string(cameraNr + 1) + "/config.xml", FileStorage::READ);
-	if (fs.isOpened())
-	{
-		fs["CameraMatrix"] >> cameraMat;
-		fs["DistortionCoeffs"] >> distMat;
-		fs["RotationValues"] >> rvecs;
-		fs["TranslationValues"] >> tvecs;
-	}
-
-	vector<Camera*> cameras = m_scene3d.getCameras();
-	Camera* currentCam = cameras[cameraNr];
-	Mat image = currentCam->getFrame();
-	for (int label = 0; label < centerMemory.size(); label++) {
-		vector<Point2f> imagePoints;
-		projectPoints(centerMemory[label], rvecs, tvecs, cameraMat, distMat, imagePoints);
-		for (int f = 1; f < imagePoints.size(); f++) {
-			line(image, imagePoints[f], imagePoints[f - 1], colors[label], 9);
+	for (int label = 0; label < traces.size(); label++) {
+		if (label == 0) glColor4f(1.f, 0.f, 0.f, 0.5f);
+		else if(label == 1) glColor4f(0.f, 1.f, 0.f, 0.5f);
+		else if (label == 2) glColor4f(0.f, 0.f, 1.f, 0.5f);
+		else if (label == 3) glColor4f(0.4f, 0.25f, 0.8f, 0.5f);
+		glLineWidth(2.5);
+		for (int frame = 1; frame < traces[label].size(); frame++) {
+			glBegin(GL_LINES);
+			glVertex2f(traces[label][frame - 1].x, traces[label][frame - 1].y);
+			glVertex2f(traces[label][frame].x, traces[label][frame].y);
+			glEnd();
 		}
 	}
-	imshow(SCENE_WINDOW, image);
 }
 
 /**
