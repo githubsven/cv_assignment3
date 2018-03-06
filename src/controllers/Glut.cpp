@@ -26,12 +26,14 @@
 #include <string>
 #include <valarray>
 #include <vector>
+#include <limits>
 
 #include "../utilities/General.h"
 #include "arcball.h"
 #include "Camera.h"
 #include "Reconstructor.h"
 #include "Scene3DRenderer.h"
+#include "../ImageUtils.h"
 
 using namespace std;
 using namespace cv;
@@ -204,6 +206,9 @@ int Glut::initializeWindows(const char* win_name)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	// Assignment 3: Create color models
+	createBaseColorModels();
+
 	//	return int(msg.wParam);
 	return 1;
 }
@@ -216,10 +221,76 @@ void Glut::mainLoopWindows()
 	while(!m_Glut->getScene3d().isQuit())
 	{
 		update(0);
-		display();
+		// Assignment 3
+		vector<int> correspondingLabels;
+		vector<int> labels;
+		trackPeople(correspondingLabels, labels);
+		display(correspondingLabels, labels);
 	}
 }
 #endif
+
+/////////////////////////////////////////////////////////////////////
+//                      ASSIGNMENT 3 FUNCTIONS                     //
+/////////////////////////////////////////////////////////////////////
+
+/**
+ * Creates color models and stores it in class variable
+ * Current color model: Mean Color
+ */
+void Glut::createBaseColorModels() {
+	vector<Point2f> points;
+	vector<int> labels(4, 0);
+	vector<Scalar> colorModels(4);
+	Mat centers;
+	ImageUtils::doKMeans(m_scene3d, points, labels, centers, 721);
+	ImageUtils::createColorModel(m_scene3d, labels, colorModels);
+	for (int i = 0; i < colorModels.size(); i++)
+		cout << colorModels[i] << endl;
+	Glut::baseColorModels = colorModels;
+}
+
+void Glut::trackPeople(vector<int>& correspondingLabels, vector<int>& labels) {
+	calculateCorrespondingLabels(correspondingLabels, labels);
+	vector<Reconstructor::Voxel*> voxels = m_scene3d.getReconstructor().getVisibleVoxels();
+
+	
+}
+
+/**
+ *
+ *	correspondingLabels: Stores to which model corresponds each label. Position in the array is equivalent to label, value is the position of the color model in baseColorModels
+ */
+void Glut::calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels) {
+	int frame = m_scene3d.getCurrentFrame();
+	vector<Point2f> points;
+	vector<Scalar> colorModels(4);
+	Mat centers;
+	ImageUtils::doKMeans(m_scene3d, points, labels, centers, frame);
+	ImageUtils::createColorModel(m_scene3d, labels, colorModels);
+
+	// Match current color models with saved baseColorModels
+	correspondingLabels = { -1, -1, -1, -1};
+	for (int i = 0; i < baseColorModels.size(); i++) {
+		vector<double> distances(4, std::numeric_limits<double>::infinity());
+		Scalar cBaseColorModel = baseColorModels[i];
+		for (int j = 0; j < colorModels.size(); j++) {
+			if (correspondingLabels[j] >= 0) {
+				// Skip iteration if the label is already assigned.
+				continue;
+			}
+			Scalar cColorModel = colorModels[j];
+			double d = ImageUtils::euclideanDistanceScalars(cBaseColorModel, cColorModel);
+			distances[j] = d;
+		}
+		int labelMin = std::distance(distances.begin(),
+			std::min_element(distances.begin(), distances.end())); // Returns the position of the most similar color model. This corresponds to the label of that color model.
+		correspondingLabels[labelMin] = i;
+	}
+}
+
+
+// END OF ASSIGNMENT 3 FUNCTIONS
 
 /**
  * http://nehe.gamedev.net/article/replacement_for_gluperspective/21002/
@@ -591,7 +662,7 @@ void Glut::idle()
 /**
  * Render the 3D scene
  */
-void Glut::display()
+void Glut::display(vector<int>& correspondingLabels, vector<int>& labels)
 {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -617,7 +688,7 @@ void Glut::display()
 	if (scene3d.isShowArcball())
 		drawArcball();
 
-	drawVoxels();
+	drawVoxels(correspondingLabels, labels);
 
 	if (scene3d.isShowOrg())
 		drawWCoord();
@@ -907,7 +978,7 @@ void Glut::drawArcball()
 /**
  * Draw all visible voxels
  */
-void Glut::drawVoxels()
+void Glut::drawVoxels(vector<int>& correspondingLabels, vector<int>& labels)
 {
 	glPushMatrix();
 
@@ -919,7 +990,27 @@ void Glut::drawVoxels()
 	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
-		glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+		//glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+		// Assignment 3
+		int label = labels[v];
+		int idPerson = correspondingLabels[label];
+		switch (idPerson) {
+		case 0:
+			glColor4f(1.f, 0.f, 0.f, 0.5f);
+			break;
+		case 1:
+			glColor4f(0.f, 1.f, 0.f, 0.5f);
+			break;
+		case 2:
+			glColor4f(0.f, 0.f, 1.f, 0.5f);
+			break;
+		case 3:
+			glColor4f(0.4f, 0.25f, 0.8f, 0.5f); //A nice shade of pink?
+			break;
+		default:
+			glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+		}
+		// End assignment 3
 		glVertex3f((GLfloat) voxels[v]->x, (GLfloat) voxels[v]->y, (GLfloat) voxels[v]->z);
 	}
 

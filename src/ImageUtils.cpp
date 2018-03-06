@@ -143,6 +143,8 @@ void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels,
 
 		Mat frame = scene3d.getCameras()[i]->getFrame();
 		for (int point = 0; point < imagePoints.size(); point++) {
+			totalBlueColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[0];
+			totalGreenColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[1];
 			totalRedColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[2];
 			totalGreenColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[1];
 			totalBlueColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[0];
@@ -156,4 +158,12 @@ void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels,
 		int meanGreen = totalGreenColors[i] / personCount[i];
 		means[i] = Scalar(meanBlue, meanGreen, meanRed);
 	}
+}
+
+double ImageUtils::euclideanDistanceScalars(cv::Scalar a, cv::Scalar b) {
+	return sqrt(
+		pow((a[0] - b[0]), 2)
+		+ pow((a[1] - b[1]), 2)
+		+ pow((a[2] - b[2]), 2)
+	);
 }

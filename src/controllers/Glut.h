@@ -8,6 +8,8 @@
 #ifndef GLUT_H_
 #define GLUT_H_
 
+#include <opencv2/core/core.hpp>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <GL/gl.h>
@@ -22,6 +24,9 @@
 #define MOUSE_WHEEL_UP   3
 #define MOUSE_WHEEL_DOWN 4
 
+using namespace cv;
+using namespace std;
+
 namespace nl_uu_science_gmt
 {
 
@@ -31,16 +36,24 @@ class Glut
 {
 	Scene3DRenderer &m_scene3d;
 
+	// Assignment 3
+	std::vector<cv::Scalar> baseColorModels;
+
 	static Glut* m_Glut;
 
 	static void drawGrdGrid();
 	static void drawCamCoord();
 	static void drawVolume();
 	static void drawArcball();
-	static void drawVoxels();
+	static void drawVoxels(vector<int>& correspondingLabels, vector<int>& labels);
 	static void drawWCoord();
 	static void drawInfo();
 	void drawTrail();
+
+	// Assignment 3
+	void createBaseColorModels();
+	void trackPeople(vector<int>& correspondingLabels, vector<int>& labels);
+	void calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels);
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);
@@ -74,7 +87,7 @@ public:
 			int, int);
 	static void reset();
 	static void idle();
-	static void display();
+	static void display(vector<int>& correspondingLabels, vector<int>& labels);
 	static void update(
 			int);
 	static void quit();

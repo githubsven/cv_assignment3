@@ -21,6 +21,8 @@ public:
 	static void showAllVideos(std::string folder, std::string file);
 	static void doKMeans(Scene3DRenderer& scene3d, vector<Point2f>& points, vector<int>& labels, Mat& centers, int frame);
 	static void createColorModel(Scene3DRenderer& scene3d, vector<int>& labels, vector<Scalar>& means);
+
+	static double euclideanDistanceScalars(Scalar a, Scalar b);
 };
 
 #endif /* BACKGROUND_UTILS_ */
