@@ -125,9 +125,8 @@ void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels,
 		objectPoints.push_back(Point3f(x, y, z));
 	}
 
-	int count = 0;
-	for (int i = 1; i < 5; i++) {
-		fs.open("data/cam" + to_string(i) + "/config.xml", FileStorage::READ);
+	for (int i = 0; i < 4; i++) {
+		fs.open("data/cam" + to_string(i + 1) + "/config.xml", FileStorage::READ);
 		if (fs.isOpened())
 		{
 			fs["CameraMatrix"] >> cameraMat;
@@ -144,16 +143,11 @@ void ImageUtils::createColorModel(Scene3DRenderer& scene3d, vector<int>& labels,
 
 		Mat frame = scene3d.getCameras()[i]->getFrame();
 		for (int point = 0; point < imagePoints.size(); point++) {
-			count++;
-			cout << to_string(labels[point]);
-			if (count == 25401 || labels[point] > 3 || imagePoints[point].x < 0  || imagePoints[point].x > 644 || imagePoints[point].y < 0 || imagePoints[point].y > 480) {
-				cout << "FUCK at " + to_string(labels[point]);
-			}
 			totalRedColors[labels[point]] += frame.at<Vec3b>(imagePoints[point])[2];
 			personCount[labels[point]] += 1;
 		}
 	}
-	cout << "DONE";
+
 	for (int i = 0; i < totalRedColors.size(); i++) {
 		means[i] = totalRedColors[i] / personCount[i];
 	}
