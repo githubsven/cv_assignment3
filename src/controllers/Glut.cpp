@@ -42,6 +42,10 @@ namespace nl_uu_science_gmt
 {
 
 Glut* Glut::m_Glut;
+std::vector<std::vector<cv::Point2d>> Glut::traces = { vector<Point2d>(),
+	vector<Point2d>(),
+	vector<Point2d>(),
+	vector<Point2d>() };
 
 Glut::Glut(
 		Scene3DRenderer &s3d) :
@@ -55,10 +59,7 @@ Glut::Glut(
 	//	vector<Point2d>(nFrames, defaultPoint),
 	//	vector<Point2d>(nFrames, defaultPoint),
 	//	vector<Point2d>(nFrames, defaultPoint)};
-	traces = { vector<Point2d>(),
-		vector<Point2d>(),
-		vector<Point2d>(),
-		vector<Point2d>()};
+	
 }
 
 Glut::~Glut()
@@ -254,6 +255,9 @@ void Glut::createBaseColorModels() {
 	vector<Scalar> colorModels(4);
 	Mat centers;
 	ImageUtils::doKMeans(m_scene3d, points, labels, centers, 721);
+	m_scene3d.setCurrentFrame(0);
+	m_scene3d.processFrame();
+	m_scene3d.getReconstructor().update();
 	ImageUtils::createColorModel(m_scene3d, labels, colorModels);
 	for (int i = 0; i < colorModels.size(); i++)
 		cout << colorModels[i] << endl;
@@ -310,6 +314,30 @@ void Glut::calculateCorrespondingLabels(vector<int>& correspondingLabels, vector
 	}
 }
 
+void Glut::drawTrail()
+{
+	glLineWidth(2.5f);
+	glPushMatrix();
+	for (int label = 0; label < traces.size(); label++) {
+		glBegin(GL_LINE_STRIP);
+
+		if (label == 0) glColor4f(1.f, 0.f, 0.f, 0.5f);
+		else if (label == 1) glColor4f(0.f, 1.f, 0.f, 0.5f);
+		else if (label == 2) glColor4f(0.f, 0.f, 1.f, 0.5f);
+		else if (label == 3) glColor4f(0.4f, 0.25f, 0.8f, 0.5f);
+
+		int lastDrawn = 0;
+		for (int frame = 0; frame < Glut::traces[label].size(); frame++) {
+			// Attempt to filter out noise of jumps by skipping points that are too far away from the last drawn point
+			//if (frame > 1 && (abs(Glut::traces[label][frame].x - Glut::traces[label][lastDrawn].x) > 200 || abs(Glut::traces[label][frame].y - Glut::traces[label][lastDrawn].y) > 200))
+				//continue;
+			glVertex3f(Glut::traces[label][frame].x, Glut::traces[label][frame].y, 0);
+			lastDrawn = frame;
+		}
+		glEnd();
+	}
+	glPopMatrix();
+}
 
 // END OF ASSIGNMENT 3 FUNCTIONS
 
@@ -716,6 +744,7 @@ void Glut::display(vector<int>& correspondingLabels, vector<int>& labels)
 	if (scene3d.isShowInfo())
 		drawInfo();
 
+	drawTrail();
 	glFlush();
 
 #ifdef __linux__
@@ -1071,23 +1100,6 @@ void Glut::drawWCoord()
 
 	glEnd();
 	glPopMatrix();
-}
-
-void Glut::drawTrail()
-{
-	for (int label = 0; label < traces.size(); label++) {
-		if (label == 0) glColor4f(1.f, 0.f, 0.f, 0.5f);
-		else if(label == 1) glColor4f(0.f, 1.f, 0.f, 0.5f);
-		else if (label == 2) glColor4f(0.f, 0.f, 1.f, 0.5f);
-		else if (label == 3) glColor4f(0.4f, 0.25f, 0.8f, 0.5f);
-		glLineWidth(2.5);
-		for (int frame = 1; frame < traces[label].size(); frame++) {
-			glBegin(GL_LINES);
-			glVertex2f(traces[label][frame - 1].x, traces[label][frame - 1].y);
-			glVertex2f(traces[label][frame].x, traces[label][frame].y);
-			glEnd();
-		}
-	}
 }
 
 /**

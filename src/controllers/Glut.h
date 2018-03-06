@@ -38,7 +38,6 @@ class Glut
 
 	// Assignment 3
 	std::vector<cv::Scalar> baseColorModels;
-	std::vector<vector<cv::Point2d>> traces;
 
 	static Glut* m_Glut;
 
@@ -49,9 +48,10 @@ class Glut
 	static void drawVoxels(vector<int>& correspondingLabels, vector<int>& labels);
 	static void drawWCoord();
 	static void drawInfo();
-	void drawTrail();
+	static void drawTrail();
 
 	// Assignment 3
+	static std::vector<std::vector<cv::Point2d>> traces;
 	void createBaseColorModels();
 	void trackPeople(vector<int>& correspondingLabels, vector<int>& labels);
 	void calculateCorrespondingLabels(vector<int>& correspondingLabels, vector<int>& labels, Mat& centers);
